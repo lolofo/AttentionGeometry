@@ -1,3 +1,8 @@
 # where the cache direction is
 .cache_bert
 .cache_attention
+
+# Pyhon byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
