@@ -1,6 +1,7 @@
 # where the cache direction is
 .cache_bert
 .cache_attention
+.idea
 
 # Pyhon byte-compiled / optimized files
 __pycache__/
@@ -8,3 +9,6 @@ __pycache__/
 *$py.class
 __pycache__
 */__pycache__/*
+
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
