@@ -278,9 +278,6 @@ class HateXPlainDataModule(pl.LightningDataModule):
         if stage == 'test' or stage is None:
             self.test_set = HateXPlain(split='test', **dataset_kwargs)
 
-        return DataLoader(self.train_set, batch_size=self.batch_size, shuffle=True, collate_fn=self.collate,
-                          num_workers=self.num_workers)
-
     def train_dataloader(self):
         return DataLoader(self.train_set, batch_size=self.batch_size, shuffle=True, collate_fn=self.collate,
                           num_workers=self.num_workers)

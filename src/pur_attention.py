@@ -14,16 +14,16 @@ from torch import optim, nn
 from torchtext.vocab.vectors import pretrained_aliases as pretrained
 import torchmetrics as m
 
-from src.attention_data_module.hatexplain import CLSTokenHateXPlainDM
-from src.attention_data_module.yelp_hat import *
-from src.attention_data_module.esnli import CLSTokenESNLIDM
-from src.modules.const import SpecToken, Mode, TrackCarbon
+from attention_data_module.hatexplain import CLSTokenHateXPlainDM
+from attention_data_module.yelp_hat import *
+from attention_data_module.esnli import CLSTokenESNLIDM
+from modules.const import SpecToken, Mode, TrackCarbon
 
-from src.modules.logger import log, init_logging
-from src.modules import metrics, rescale, INF
+from modules.logger import log, init_logging
+from modules import metrics, rescale, INF
 
-from src.model.attention.pur_attention_key import PureAttention
-from src.modules.loss import IoU
+from model.attention.pur_attention_key import PureAttention
+from modules.loss import IoU
 
 
 class AttitModel(pl.LightningModule):
@@ -372,7 +372,7 @@ def parse_argument(prog: str = __name__, description: str = 'Experimentation on 
     parser.add_argument('--track_carbon', type=str, help='If precised will track down carbon')
 
     # Training params
-    parser.add_argument('--cache', '-o', type=str, default=path.join(os.getcwd(), '..', '.cache_attention'),
+    parser.add_argument('--cache', '-o', type=str, default=path.join(os.getcwd(), '.cache_attention'),
                         help='Path to temporary directory to store output of training process')
     parser.add_argument('--mode', '-m', type=str, default='dev',
                         help='Choose among f[dev, exp]. "exp" will disable the progressbar')

@@ -2,6 +2,7 @@
 .cache_bert
 .cache_attention
 .idea
+.venv
 
 # Pyhon byte-compiled / optimized files
 __pycache__/
