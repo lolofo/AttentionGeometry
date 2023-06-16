@@ -128,6 +128,7 @@ def main(bert_model, data_module, nb_data, batch_size,  ft=True, representative=
     emb_cos_values = {
         f"cos_class_{c}": np.array([]) for c in range(data_module.num_class)
     }
+    predictions = []
 
     class_id = np.array([])
 
@@ -153,6 +154,8 @@ def main(bert_model, data_module, nb_data, batch_size,  ft=True, representative=
 
             # for every sentence we get the embedding of the CLS token
             emb = bert_output.hidden_states[-1][:, 0, :]
+            pred = list(torch.argmax(output["logits"], dim=-1).cpu().numpy())
+            predictions += pred
 
             for c in range(data_module.num_class):
                 rep_emb = class_rep_res[f"class_{c}"]["emb"][-1]
@@ -162,4 +165,70 @@ def main(bert_model, data_module, nb_data, batch_size,  ft=True, representative=
         res = pd.DataFrame(emb_cos_values)
         res["label"] = class_id
     v_print(">> all done !")
-    return res, class_rep_res
+    return res, class_rep_res, predictions
+
+
+
+def bert_type_main(bert_model, data_module, nb_data, batch_size,  ft=True, representative=None, verbose=True):
+    """bert_type_main
+
+    This function is the main function to execute in the notebook S01EP01.
+    We will compute all the different cosines possible
+
+    Args:
+        bert_model : a bert type model
+        data_module : a dataloader which corresponds to the BERT model.
+        ft (bool): a boolean parameter to know if the model is a fine-tuned one (True)
+        representative (Tensor) : a tensor (can be none type). Give the representative for the raw model
+        verbose(bool): classic boolean to print some logs
+
+    Returns:
+        This function returns a tuple.
+        * the first comp of the tuple is the dataframe of the different cosine values
+        * the second component of the tuple is the representative we use for our computation
+    """
+    v_print = print if verbose else lambda *a, **k: None
+
+    DEVICE = bert_model.device
+
+    emb_cos_values = {
+        f"cos_class_{c}": np.array([]) for c in range(data_module.num_class)
+    }
+    predictions = []
+
+    class_id = np.array([])
+
+    with torch.no_grad():
+        # search the representative for our embeddings
+        if ft:
+            v_print(">> Searching the rep")
+            class_rep_res = search_rep(bert_model, data_module, ft)
+        else:
+            v_print(">> Re-use the rep")
+            class_rep_res = representative
+        v_print(">> rep found !")
+
+        v_print(">> start the loop")
+        for batch in test_dataloader:
+
+            ids = batch["input_ids"].to(DEVICE)
+            class_id = np.concatenate((class_id, batch["labels"].to(DEVICE).cpu().numpy()))
+            attention_mask = batch["attention_masks"].bool().to(DEVICE)
+
+            output = bert_model(ids, attention_mask)
+            bert_output = output["outputs"]
+
+            # for every sentence we get the embedding of the CLS token
+            emb = bert_output.hidden_states[-1][:, 0, :]
+            pred = list(torch.argmax(output["logits"], dim=-1).cpu().numpy())
+            predictions += pred
+
+            for c in range(data_module.num_class):
+                rep_emb = class_rep_res[f"class_{c}"]["emb"][-1]
+                emb_cos_values[f"cos_class_{c}"] = np.concatenate((emb_cos_values[f"cos_class_{c}"],
+                                                                    compute_cos(rep_emb, emb).cpu().numpy()))
+
+        res = pd.DataFrame(emb_cos_values)
+        res["label"] = class_id
+    v_print(">> all done !")
+    return res, class_rep_res, predictions
